@@ -65,7 +65,7 @@ def predict(x):
     y_count_pred_scaled = slope_count * x_scaled + intercept_count
     y_count_predicted = np.exp((y_count_pred_scaled * y_count_std) + y_count_mean)
 
-    print("Model Count in Predict: {}".format(model_count))
+    # print("Model Count in Predict: {}".format(model_count))
     # print("x_scaled: {}".format(x_scaled))
     # print("y_count_std: {}".format(y_count_std))
     # print("y_count_mean: {}".format(y_count_mean))
@@ -79,7 +79,7 @@ def predict(x):
     y_size_pred_scaled = slope_size * x_scaled + intercept_size
     y_size_predicted = np.exp((y_size_pred_scaled * y_size_std) + y_size_mean)
 
-    print("Year: {}\nCount: {}\nSize: {}".format(x, y_count_predicted, y_size_predicted))
+    print("\nYear: {}\nCount: {}\nSize: {}".format(x, y_count_predicted, y_size_predicted))
 
 if __name__ == '__main__':
 
@@ -110,8 +110,12 @@ if __name__ == '__main__':
     # plotData(x_year, y_count, y_size)
 
     learning_rate_count = optimizeLR(x_year_scaled, y_count_scaled)
+    print("\nLearning Rate for Count: {}".format(learning_rate_count))
     learning_rate_size = optimizeLR(x_year_scaled, y_size_scaled)
+    print("Learning Rate for Size: {}".format(learning_rate_size))
+
     plotRegression(x_year_scaled, y_count_scaled, learning_rate_count)
     plotRegression(x_year_scaled, y_size_scaled, learning_rate_size)
 
-    predict(2020)
+    predict(1979)
+    print("\n")
