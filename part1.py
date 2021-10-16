@@ -43,25 +43,30 @@ def minimizeLossFunc(x, y, learning_rate):
 
     return (slope,intercept,loss)
 
-# def predict(x):
-#     model_count = minimizeLossFunc(y_count_scaled)
-#     slope_count = model_count[0]
-#     # print("Model Count in Predict: {}".format(model_count))
-#     intercept_count = model_count[1]
-#     x_scaled = (x - x_year_mean)/x_year_std
-#     y_pred_scaled = slope_count * x_scaled + intercept_count
-#     y_count_predicted = np.exp(((slope_count * x_scaled + intercept_count) * y_count_std) + y_count_mean)
-#     # print("x_scaled: {}".format(x_scaled))
-#     # print("y_count_std: {}".format(y_count_std))
-#     # print("y_count_mean: {}".format(y_count_mean))
-#     # print("y_pred_scaled: {}".format(y_pred_scaled))
-#
-#     model_size = minimizeLossFunc(y_size)
-#     slope_size = model_size[0]
-#     intercept_size = np.exp(model_size[1])
-#     y_size_predicted = np.exp(slope_size * x + intercept_size)
-#
-#     print("Year: {}\nCount: {}\nSize: {}".format(x, y_count_predicted, y_size_predicted))
+def predict(x, learning_rate_count, learning_rate_size):
+    x_scaled = (x - x_year_mean)/x_year_std
+
+    model_count = minimizeLossFunc(x_year_scaled, y_count_scaled, learning_rate_count)
+    slope_count = model_count[0]
+    intercept_count = np.exp(model_count[1])
+
+    y_pred_scaled = slope_count * x_scaled + intercept_count
+    y_count_predicted = np.exp((y_pred_scaled * y_count_std) + y_count_mean)
+
+    # print("Model Count in Predict: {}".format(model_count))
+    print("x_scaled: {}".format(x_scaled))
+    print("y_count_std: {}".format(y_count_std))
+    print("y_count_mean: {}".format(y_count_mean))
+    print("y_pred_scaled: {}".format(y_pred_scaled))
+    print("y_count_predicted: {}".format(y_count_predicted))
+
+    model_size = minimizeLossFunc(x_year_scaled, y_size, learning_rate_size)
+    slope_size = model_size[0]
+    intercept_size = np.exp(model_size[1])
+
+    y_size_predicted = np.exp(slope_size * x + intercept_size)
+
+    print("Year: {}\nCount: {}\nSize: {}".format(x, y_count_predicted, y_size_predicted))
 
 def plotRegression(x, y, learning_rate):
     model = minimizeLossFunc(x, y, learning_rate)
@@ -100,5 +105,7 @@ if __name__ == '__main__':
 
     learning_rate_count = optimizeLR(x_year_scaled, y_count_scaled)
     learning_rate_size = optimizeLR(x_year_scaled, y_size_scaled)
-    plotRegression(x_year_scaled, y_count_scaled, learning_rate_count)
-    plotRegression(x_year_scaled, y_size_scaled, learning_rate_size)
+    # plotRegression(x_year_scaled, y_count_scaled, learning_rate_count)
+    # plotRegression(x_year_scaled, y_size_scaled, learning_rate_size)
+
+    predict(1985,learning_rate_count, learning_rate_size)
