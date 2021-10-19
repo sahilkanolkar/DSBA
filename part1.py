@@ -9,46 +9,38 @@ def plotData(x, y1, y2):
     ax[1].scatter(x, y2)
     plt.show()
 
-def optimizeLR(x, y):
-    """
-    Test values of Learning Rate between 0.0000001 to 100
-    """
-
-    learning_rate = 0.0000001
-    optimized_LR = learning_rate
-    min_loss_function = 100
-
-    while (learning_rate <= 100):
-        loss = minimizeLossFunc(x, y, learning_rate)[2][-1]
-        if loss < min_loss_function:
-            min_loss_function = loss
-            optimized_LR = learning_rate
-
-        learning_rate *= 2
-    return optimized_LR
-
-def minimizeLossFunc(x, y, learning_rate):
-    n = len(y)
+def minimizeError(x, y, learning_rate):
+    max_iterations = 100000
     slope = 0
     intercept = 0
-    loss = []
 
-    for i in range(n):
+    error = 0
+    old_error = 0
+    tolerance = 0.0000000001
+    residual = 1
+
+    while(residual > tolerance):
         y_predicted = slope * x + intercept
-        loss.append((1/n) * sum((y - y_predicted) ** 2))
-        derivate_by_slope = (-2/n) * sum(x * (y - y_predicted))
-        derivate_by_intercept = (-2/n) * sum(y - y_predicted)
-        # print(slope)
+        derivate_by_slope = (-2) * sum(x * (y - y_predicted))
+        derivate_by_intercept = (-2) * sum((y - y_predicted))
+
         slope -= learning_rate * derivate_by_slope
         intercept -= learning_rate * derivate_by_intercept
 
-    return (slope,intercept,loss)
+        error = sum(y - y_predicted)
+        residual = abs(error - old_error)
+        old_error = error
+        max_iterations -= 1
+        if max_iterations == 0:
+            break
+
+    return (slope,intercept,error)
 
 def plotRegression(x, y, learning_rate):
-    model = minimizeLossFunc(x, y, learning_rate)
+    model = minimizeError(x, y, learning_rate)
     slope = model[0]
     intercept = model[1]
-    loss = model[2]
+    error = model[2]
     y_predicted = slope * x + intercept
 
     plt.scatter(x, y)
@@ -58,21 +50,14 @@ def plotRegression(x, y, learning_rate):
 def predict(x):
     x_scaled = (x - x_year_mean)/x_year_std
 
-    model_count = minimizeLossFunc(x_year_scaled, y_count_scaled, learning_rate_count)
+    model_count = minimizeError(x_year_scaled, y_count_scaled, learning_rate_count)
     slope_count = model_count[0]
     intercept_count = model_count[1]
 
     y_count_pred_scaled = slope_count * x_scaled + intercept_count
     y_count_predicted = np.exp((y_count_pred_scaled * y_count_std) + y_count_mean)
 
-    # print("Model Count in Predict: {}".format(model_count))
-    # print("x_scaled: {}".format(x_scaled))
-    # print("y_count_std: {}".format(y_count_std))
-    # print("y_count_mean: {}".format(y_count_mean))
-    # print("y_count_pred_scaled: {}".format(y_count_pred_scaled))
-    # print("y_count_predicted: {}".format(y_count_predicted))
-
-    model_size = minimizeLossFunc(x_year_scaled, y_size_scaled, learning_rate_size)
+    model_size = minimizeError(x_year_scaled, y_size_scaled, learning_rate_size)
     slope_size = model_size[0]
     intercept_size = model_size[1]
 
@@ -83,39 +68,38 @@ def predict(x):
 
 if __name__ == '__main__':
 
-    transistors_data = pd.read_csv("transistor.csv", header = None)
+    transistors_data = np.genfromtxt("transistor.csv", delimiter = ",")
+    x = []
+    y1 = []
+    y2 = []
+    for i in range(transistors_data.shape[0]):
+        x.append(transistors_data[i][0])
+        y1.append(transistors_data[i][1])
+        y2.append(transistors_data[i][2])
 
-    x_year = np.array(transistors_data[0])
+    x_year = np.array(x)
+    count = np.array(y1)
+    size = np.array(y2)
+
     x_year_mean = np.mean(x_year)
     x_year_std = np.std(x_year)
     x_year_scaled = (x_year - x_year_mean)/x_year_std
-    # print("x_year_scaled: {}".format(x_year_scaled))
 
-    count = np.array(transistors_data[1])
     y_count = np.log(count)
-    # print("y_count: {}".format(y_count))
     y_count_mean = np.mean(y_count)
     y_count_std = np.std(y_count)
     y_count_scaled = (y_count - y_count_mean)/y_count_std
-    # print("y_count_scaled: {}".format(y_count_scaled))
 
-    size = np.array(transistors_data[2])
     y_size = np.log(size)
     y_size_mean = np.mean(y_size)
     y_size_std = np.mean(y_size)
     y_size_scaled = (y_size - y_size_mean)/y_size_std
-    # print("y_size_scaled: {}".format(y_size_scaled))
 
-    # plotData(x_year, count, size)
-    # plotData(x_year, y_count, y_size)
-
-    learning_rate_count = optimizeLR(x_year_scaled, y_count_scaled)
-    print("\nLearning Rate for Count: {}".format(learning_rate_count))
-    learning_rate_size = optimizeLR(x_year_scaled, y_size_scaled)
-    print("Learning Rate for Size: {}".format(learning_rate_size))
+    learning_rate_count = 0.012
+    learning_rate_size = 0.012
 
     plotRegression(x_year_scaled, y_count_scaled, learning_rate_count)
     plotRegression(x_year_scaled, y_size_scaled, learning_rate_size)
 
-    predict(1979)
+    predict(1987)
     print("\n")
